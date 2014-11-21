@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Twitterati</title>
+<script src="twitter.js"></script>
+
+</head>
+
+<body>
+	<div id="container">
+		<div id='side'>
+<input type="text" placeholder="search" name="twit_screen_name" id="twit_screen_name" onkeydown="if (event.keyCode == 13) check_user()"/>
+			<input type="button" value="Add" name="add_user" id = "add_twit_user" onclick = "check_user()" />
+			
+			<br/>
+			<div>
+				<ul id = "list_of_users" >
+				</ul>
+			</div>
+		</div>
+		<div id='content'>
+			<ul id = "hash_tags">
+			</ul>
+			<table id="tweets_of_users">
+			</table>
+			
+		</div>
+	</div>
+</body>
+</html>		
