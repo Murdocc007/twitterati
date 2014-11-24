@@ -28,7 +28,8 @@ var set_new_hashtags = function(updated_set_hashtags) {
  		remove_all_children(container);
 
 		for(var h in updated_set_hashtags) {
-			var li = document.createElement("li");
+			var li = document.createElement("a");
+            li.setAttribute('href',"#");
 			li.setAttribute('id', h);
 			li.setAttribute('class', 'hashtag')
 			li.appendChild(document.createTextNode('#'+ h + '(' + updated_set_hashtags[h] + ')'));
@@ -181,37 +182,79 @@ var update_feed_container = function() {
 }
 
 var add_user = function(obj) {
-	get_feed(obj);
-
-	var ulel = document.getElementById("list_of_users");
-	var liel = document.createElement("li");
-	img=document.createElement("img");
-	img.setAttribute('src', obj.profile_image_url);
-	liel.appendChild(img);
-	var checkbox = document.createElement('input');
-	checkbox.type = "checkbox";
-
-	
-	checkbox.addEventListener('click', function() {
-		if(this.checked) {
-			checked_users.push(obj.id_str);
-		} else {
-			var index = checked_users.indexOf(obj.id_str);
-			if(index > -1) {
-				checked_users.splice(index, 1);
+	var errors = false;
+	var xhr = create_xhr();
+	var url = 'index.php?query=feed&screen_name='+obj.screen_name+'&count=20';
+	xhr.onreadystatechange = function() {
+		if(xhr.readyState == 4 && xhr.status == 200) {
+			var json = xhr.responseText;
+			var json_obj = JSON.parse(json);
+		
+			for(var t in json_obj) {
+				all_tweets.push(json_obj[t]);
 			}
-		}
-        update_feed_container();
-    });
+			all_tweets = all_tweets.sort(dateComparator);
 
-	var label = document.createElement('label')
-	label.htmlFor = obj.id;
-	label.appendChild(document.createTextNode(obj.name));
+			for(var t in json_obj) {
+				if(json_obj[t].entities.hashtags.length > 0) {
+					var hashtags = json_obj[t].entities.hashtags;
+					for(var h in hashtags) {
+						var array;	
+						if(!(hash_map[hashtags[h].text])) {
+							array = [];
+						} else {
+							array = hash_map[hashtags[h].text];
+						}
+						
+						obj_tweet_parent = new Object();
+						obj_tweet_parent['tweet'] = json_obj[t];
+						obj_tweet_parent['parent'] = json_obj[t].user;
 
-	liel.appendChild(label);
-	liel.appendChild(checkbox);
-	
-	ulel.appendChild(liel);
+						array.push(obj_tweet_parent);
+						hash_map[hashtags[h].text] = array;
+					}
+				}
+			}
+			update_hashtags_container();
+            var table = document.getElementById("list_of_users");
+            var rowCount = table.rows.length;
+            var row = table.insertRow("rowCount");
+
+            var cell1 = row.insertCell(0);
+            img=document.createElement("img");
+            img.setAttribute('src', obj.profile_image_url);
+            cell1.appendChild(img);
+
+            var label = document.createElement('label')
+            label.htmlFor = obj.id;
+            label.appendChild(document.createTextNode(obj.name));
+            cell1.appendChild(label);
+
+
+            var cell2 = row.insertCell(1);
+            var checkbox = document.createElement('input');
+            checkbox.type = "checkbox";
+
+
+            checkbox.addEventListener('click', function() {
+                if(this.checked) {
+                    checked_users.push(obj.id_str);
+                } else {
+                    var index = checked_users.indexOf(obj.id_str);
+                    if(index > -1) {
+                        checked_users.splice(index, 1);
+                    }
+                }
+                update_feed_container();
+            });
+
+
+            cell2.appendChild(checkbox);
+                }
+
+            }
+            xhr.open("GET", url, true)
+            xhr.send();
 }
 
 var user_lookup = function(screen_name) {
@@ -295,7 +338,7 @@ var buildTweetContainer = function(userObj, tweetObj) {
     hashtag="<a href='#'  onclick=update_feed_with_hashtweets('"+indices_array[i].text+"')>#"+indices_array[i].text+"</a>"
     var postfix=tweet.substring(indices_array[i].indices[1],tweet.length); 
     tweet=prefix+hashtag+postfix;
-    /*tweet=tweet.replace(tweetObj.entities.hashtags[i].text,"<a href='#'  onclick=update_feed_with_hashtweets('"+tweetObj.entities.hashtags[i].text+"')>#"+tweetObj.entities.hashtags[i].text+"</a>");*/
+
     }
     var temp=document.createElement("div");
     temp.innerHTML=tweet;
@@ -303,12 +346,15 @@ var buildTweetContainer = function(userObj, tweetObj) {
     
 	var timestamp = document.createElement('div');
 	timestamp.setAttribute('class', 'timestamp');
-	timestamp.appendChild(document.createTextNode(tweetObj.created_at))
+	timestamp.appendChild(document.createTextNode(tweetObj.created_at));
+    
 	
+        
 	outerdiv.appendChild(prof_img);
 	outerdiv.appendChild(tweetname);
 	outerdiv.appendChild(tweetbody);
 	outerdiv.appendChild(timestamp);
 
+    
 	return outerdiv;
 }

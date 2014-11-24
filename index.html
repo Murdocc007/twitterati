@@ -2,29 +2,71 @@
 <html>
 <head>
 <title>Twitterati</title>
+<style>
+#list_of_users {
+   float: left;
+    padding-right: 10px;
+}
+
+li{   
+display: inline;  
+list-style-type: none;
+position: relative;
+padding-right: 10px;
+}    
+border{
+ border-collapse:collapse;   
+}
+#list_of_users td:nth-child(1){
+   padding-right: 10px; 
+    width:145px;
+}
+#list_of_users td:nth-child(2){
+   padding-right: 10px; 
+   padding-left: 10px;
+}    
+#twit_screen_name{
+width:180px;
+}
+.tweetcontainer img{
+float: left;
+}
+
+#hash_tags{
+overflow: auto;
+word-wrap: break-word;
+}
+
+.timestamp{
+padding-bottom: 20px;
+}
+</style>  
+<link rel="stylesheet" type="text/css" href="bootstrap.min.css">    
 <script src="twitter.js"></script>
-
 </head>
-
 <body>
 	<div id="container">
-		<div id='side'>
-<input type="text" placeholder="search" name="twit_screen_name" id="twit_screen_name" onkeydown="if (event.keyCode == 13) check_user()"/>
-			<input type="button" value="Add" name="add_user" id = "add_twit_user" onclick = "check_user()" />
-			
-			<br/>
-			<div>
-				<ul id = "list_of_users" >
-				</ul>
+		<div id='side'>          
+<input type="text" placeholder="Enter the Twitter Handle" name="twit_screen_name" id="twit_screen_name" onkeydown="if (event.keyCode == 13) check_user()"/>
+			 <input type="button" value="Add" name="add_user" id = "add_twit_user" onclick = "check_user()" />
+        </div>
+        
+			<div >
+				<table id = "list_of_users" border=1 style="margin-right:10px;">
+				</table>
+                
+                <div>
+                    <ul id = "hash_tags" >
+                    </ul>
+                <table id="tweets_of_users">			     
+                </table>
+                </div>
+           
+                
 			</div>
-		</div>
-		<div id='content'>
-			<ul id = "hash_tags">
-			</ul>
-			<table id="tweets_of_users">
-			</table>
-			
-		</div>
+            
+	
+		
 	</div>
 </body>
 </html>		
