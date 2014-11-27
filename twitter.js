@@ -1,4 +1,3 @@
-
 hash_map = new Object();
 all_tweets = [];
 checked_users = [];
@@ -34,6 +33,7 @@ var set_new_hashtags = function(updated_set_hashtags) {
 			li.setAttribute('class', 'hashtag')
 			li.appendChild(document.createTextNode('#'+ h + '(' + updated_set_hashtags[h] + ')'));
 			li.onclick = attach(li.id);
+                        li.setAttribute('style','padding-right:10px;');
 		
 			container.appendChild(li);
 		}
@@ -99,10 +99,12 @@ var update_hashtags_container = function() {
            }
         if(count)
             {
-              var li = document.createElement("li");
+              var li = document.createElement("a");
+                     li.setAttribute('href',"#");
 		      li.setAttribute('id', h);
 		      li.setAttribute('class', 'hashtag');
 		      li.appendChild(document.createTextNode('#'+ h + '(' + count + ')'));
+                      li.setAttribute('style','padding-right:10px;')
               li.onclick = attach(li.id);
               container.appendChild(li);
             }
@@ -186,7 +188,10 @@ var add_user = function(obj) {
 	var xhr = create_xhr();
 	var url = 'index.php?query=feed&screen_name='+obj.screen_name+'&count=20';
 	xhr.onreadystatechange = function() {
-		if(xhr.readyState == 4 && xhr.status == 200) {
+		if(xhr.readyState == 4 )
+                       {
+                       loadingOff();
+                        if(xhr.status == 200) {
 			var json = xhr.responseText;
 			var json_obj = JSON.parse(json);
 		
@@ -196,165 +201,4 @@ var add_user = function(obj) {
 			all_tweets = all_tweets.sort(dateComparator);
 
 			for(var t in json_obj) {
-				if(json_obj[t].entities.hashtags.length > 0) {
-					var hashtags = json_obj[t].entities.hashtags;
-					for(var h in hashtags) {
-						var array;	
-						if(!(hash_map[hashtags[h].text])) {
-							array = [];
-						} else {
-							array = hash_map[hashtags[h].text];
-						}
-						
-						obj_tweet_parent = new Object();
-						obj_tweet_parent['tweet'] = json_obj[t];
-						obj_tweet_parent['parent'] = json_obj[t].user;
-
-						array.push(obj_tweet_parent);
-						hash_map[hashtags[h].text] = array;
-					}
-				}
-			}
-			update_hashtags_container();
-            var table = document.getElementById("list_of_users");
-            var rowCount = table.rows.length;
-            var row = table.insertRow("rowCount");
-
-            var cell1 = row.insertCell(0);
-            img=document.createElement("img");
-            img.setAttribute('src', obj.profile_image_url);
-            cell1.appendChild(img);
-
-            var label = document.createElement('label')
-            label.htmlFor = obj.id;
-            label.appendChild(document.createTextNode(obj.name));
-            cell1.appendChild(label);
-
-
-            var cell2 = row.insertCell(1);
-            var checkbox = document.createElement('input');
-            checkbox.type = "checkbox";
-
-
-            checkbox.addEventListener('click', function() {
-                if(this.checked) {
-                    checked_users.push(obj.id_str);
-                } else {
-                    var index = checked_users.indexOf(obj.id_str);
-                    if(index > -1) {
-                        checked_users.splice(index, 1);
-                    }
-                }
-                update_feed_container();
-            });
-
-
-            cell2.appendChild(checkbox);
-                }
-
-            }
-            xhr.open("GET", url, true)
-            xhr.send();
-}
-
-var user_lookup = function(screen_name) {
-	var errors = false;
-	var xhr = create_xhr();
-	var url = 'index.php?query=lookup&screen_name='+screen_name;
-	xhr.onreadystatechange = function() {
-		if(xhr.readyState == 4) {
-			var json = xhr.responseText;
-			var json_obj = JSON.parse(json);
-			for(var key in json_obj)
-			{
-				if(key=='errors') {
-					errors = true;
-					break;
-				}
-			}
-			if(errors)
-			{
-				alert("User with screen name "+screen_name+" does not exist");
-			} else {
-				add_user(json_obj[0]);
-			}
-		}
-	}
-	xhr.open("GET", url, true);
-	xhr.send();
-}
-
-var check_user = function() {
-	var name = document.getElementById("twit_screen_name").value;
-        for(var i=0;i<all_users.length;i++)
-         {
-          if(all_users[i]==name)
-            {
-              alert("User Already Exists!");
-              return;
-            }
-        }
-	if(name!="")
-	{
-                 all_users[all_users.length++]=name;
-		user_lookup(name);
-	}
-}
-
-var comparator=function(a,b){
-
-var t1=a.indices[0];
-var t2=b.indices[0];
-    
-    if(t1 > t2) return 1;
-	else if(t1 == t2) return 0;
-	else return -1;
-
-}
-var buildTweetContainer = function(userObj, tweetObj) {
-	var outerdiv = document.createElement('row');
-	outerdiv.setAttribute('class', 'tweetcontainer');
-	outerdiv.setAttribute('rel', userObj.id_str);
-
-	var prof_img = document.createElement('img');
-	prof_img.setAttribute('src', userObj.profile_image_url);
-	
-	var tweetname = document.createElement('div');
-	tweetname.setAttribute('class', 'tweetname');
-	tweetname.appendChild(document.createTextNode(userObj.name));
-
-	var tweetbody = document.createElement('div');
-	tweetbody.setAttribute('class', 'tweetbody');
-	tweetbody.setAttribute('id', tweetObj.id_str);
-    
-    var tweet= tweetObj.text;
-
-    var indices_array=tweetObj.entities.hashtags;
-    indices_array=indices_array.sort(comparator);
-    for(var i=(indices_array.length)-1;i>=0;i--)
-    {
-    var prefix=tweet.substring(0,indices_array[i].indices[0]);
-    var hashtag=tweet.substring(indices_array[i].indices[0],indices_array[i].indices[1]);
-    hashtag="<a href='#'  onclick=update_feed_with_hashtweets('"+indices_array[i].text+"')>#"+indices_array[i].text+"</a>"
-    var postfix=tweet.substring(indices_array[i].indices[1],tweet.length); 
-    tweet=prefix+hashtag+postfix;
-
-    }
-    var temp=document.createElement("div");
-    temp.innerHTML=tweet;
-    tweetbody.appendChild(temp);
-    
-	var timestamp = document.createElement('div');
-	timestamp.setAttribute('class', 'timestamp');
-	timestamp.appendChild(document.createTextNode(tweetObj.created_at));
-    
-	
-        
-	outerdiv.appendChild(prof_img);
-	outerdiv.appendChild(tweetname);
-	outerdiv.appendChild(tweetbody);
-	outerdiv.appendChild(timestamp);
-
-    
-	return outerdiv;
-}
+				if(json_obj[t].entit

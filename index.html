@@ -9,14 +9,10 @@
 }
 
 li{   
-display: inline;  
 list-style-type: none;
 position: relative;
 padding-right: 10px;
 }    
-border{
- border-collapse:collapse;   
-}
 #list_of_users td:nth-child(1){
    padding-right: 10px; 
     width:145px;
@@ -31,14 +27,15 @@ width:180px;
 .tweetcontainer img{
 float: left;
 }
-
+#twit_screen_name{
+background:transparent url(search-icon.gif) no-repeat scroll left center;
+margin:0;
+max-width:230px;
+padding-left:16px;
+}
 #hash_tags{
 overflow: auto;
 word-wrap: break-word;
-}
-
-.timestamp{
-padding-bottom: 20px;
 }
 </style>  
 <link rel="stylesheet" type="text/css" href="bootstrap.min.css">    
@@ -47,13 +44,16 @@ padding-bottom: 20px;
 <body>
 	<div id="container">
 		<div id='side'>          
-<input type="text" placeholder="Enter the Twitter Handle" name="twit_screen_name" id="twit_screen_name" onkeydown="if (event.keyCode == 13) check_user()"/>
-			 <input type="button" value="Add" name="add_user" id = "add_twit_user" onclick = "check_user()" />
+<input type="text" placeholder="Enter the Twitter Handle" name="twit_screen_name" id="twit_screen_name" onkeydown="if (event.keyCode == 13) check_user()" style="border-radius:5px;"/>
+			 <input type="button" value="Add" name="add_user" id = "add_twit_user" onclick = "check_user()"  style="border-radius: 6px;
+border: 2px solid;"/>
         </div>
         
 			<div >
-				<table id = "list_of_users" border=1 style="margin-right:10px;">
-				</table>
+				<div id="users_div" style="border-radius:10px;">
+                                <ul id = "list_of_users"  style="margin-right:10px;border: 1px solid;list-style: none;padding: 0;margin: 10px;border-radius: 5px;display:none">
+				</ul>
+                                </div>
                 
                 <div>
                     <ul id = "hash_tags" >
@@ -61,12 +61,13 @@ padding-bottom: 20px;
                 <table id="tweets_of_users">			     
                 </table>
                 </div>
-           
-                
 			</div>
             
 	
 		
 	</div>
+<div id="loader" style="position: fixed; z-index: 90; top: 0px; left: 0px; display: none; background: white;width: 1167px;height: 1000px;">
+<div style="margin: 20% auto; width: 238px; height: 29px; background: #fff;">Loading the user and the tweets... <img src='ajax-loader.gif'/></div>
+</div>
 </body>
-</html>		
+</html>			
